@@ -56,10 +56,10 @@ const FOOTER_HTML = `
           <img src="/logo.png" alt="Kenest Cleaning Co." class="footer-logo">
           <p class="footer-tagline">Spotless spaces. Reliable service.</p>
           <div class="social-icons">
-            <a href="https://instagram.com" target="_blank" rel="noopener" class="social-icon" aria-label="Instagram">
+            <a href="https://www.instagram.com/kenestcleaning" target="_blank" rel="noopener" class="social-icon" aria-label="Instagram">
               <i class="fa-brands fa-instagram"></i>
             </a>
-            <a href="https://facebook.com" target="_blank" rel="noopener" class="social-icon" aria-label="Facebook">
+            <a href="https://www.facebook.com/share/1VFYw3aeJN/?mibextid=wwXIfr" target="_blank" rel="noopener" class="social-icon" aria-label="Facebook">
               <i class="fa-brands fa-facebook-f"></i>
             </a>
           </div>
