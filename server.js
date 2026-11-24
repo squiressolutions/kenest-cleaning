@@ -2,6 +2,7 @@ import express from 'express'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import nodemailer from 'nodemailer'
+import PDFDocument from 'pdfkit'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const app  = express()
@@ -185,6 +186,167 @@ app.post('/api/contact', async (req, res) => {
   }
 })
 
+// ── PDF Builder ───────────────────────────────────────────────────────────────
+function buildQuotePDF(d) {
+  return new Promise((resolve, reject) => {
+    const doc = new PDFDocument({ size: 'LETTER', margin: 50, bufferPages: true })
+    const chunks = []
+    doc.on('data', c => chunks.push(c))
+    doc.on('end',  () => resolve(Buffer.concat(chunks)))
+    doc.on('error', reject)
+
+    const W        = 512   // content width (612 - 50*2)
+    const NAVY     = '#1a2744'
+    const GREEN    = '#3ab529'
+    const LGREY    = '#f5f6f8'
+    const DGREY    = '#555'
+    const isPost   = d.serviceType === 'postconstruction'
+    const dateStr  = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' })
+
+    /* ── HEADER BAND ─────────────────────────────────────────── */
+    doc.rect(50, 50, W, 72).fill(NAVY)
+    doc.font('Helvetica-Bold').fontSize(18).fillColor('#fff')
+       .text('KENEST CLEANING CO.', 66, 68)
+    doc.font('Helvetica').fontSize(10).fillColor('rgba(255,255,255,0.55)')
+       .text('Commercial & Post-Construction Cleaning · St. Louis, MO', 66, 92)
+    // "QUOTE" badge on right
+    doc.font('Helvetica-Bold').fontSize(22).fillColor(GREEN)
+       .text('QUOTE', 0, 71, { align: 'right', width: W + 50 })
+
+    // green accent line
+    doc.rect(50, 122, W, 4).fill(GREEN)
+
+    /* ── CLIENT / DATE ROW ───────────────────────────────────── */
+    let y = 142
+    doc.font('Helvetica-Bold').fontSize(9).fillColor(GREEN)
+       .text('CLIENT', 50, y)
+    doc.font('Helvetica-Bold').fontSize(13).fillColor(NAVY)
+       .text(d.client, 50, y + 14)
+    if (d.phone) {
+      doc.font('Helvetica').fontSize(10).fillColor(DGREY)
+         .text(d.phone, 50, y + 32)
+    }
+
+    doc.font('Helvetica-Bold').fontSize(9).fillColor(GREEN)
+       .text('DATE GENERATED', 0, y, { align: 'right', width: W + 50 })
+    doc.font('Helvetica').fontSize(10).fillColor(DGREY)
+       .text(dateStr, 0, y + 14, { align: 'right', width: W + 50 })
+
+    /* ── PRICE BOX ───────────────────────────────────────────── */
+    y = d.phone ? 208 : 196
+    doc.rect(50, y, W, 90).fill(NAVY)
+    const priceLabel = isPost ? 'TOTAL JOB PRICE' : 'MONTHLY TOTAL'
+    doc.font('Helvetica-Bold').fontSize(9).fillColor('rgba(255,255,255,0.45)')
+       .text(priceLabel, 50, y + 14, { align: 'center', width: W })
+    doc.font('Helvetica-Bold').fontSize(42).fillColor('#fff')
+       .text(d.monthly, 50, y + 28, { align: 'center', width: W })
+    if (!isPost && d.freq) {
+      doc.font('Helvetica').fontSize(10).fillColor('rgba(255,255,255,0.45)')
+         .text(d.freq, 50, y + 73, { align: 'center', width: W })
+    }
+
+    /* ── PRICE BREAKDOWN ─────────────────────────────────────── */
+    y += 106
+    doc.font('Helvetica-Bold').fontSize(9).fillColor(GREEN)
+       .text('PRICE BREAKDOWN', 50, y)
+    y += 16
+
+    const rows = [
+      ['Service Type', isPost ? 'Post-Construction' : 'Commercial Cleaning'],
+      ...(isPost ? [['Clean Tier', d.tier !== '—' ? d.tier : '—']] : []),
+      ['Square Footage', `${Number(d.sqft).toLocaleString()} sqft`],
+      ['Rate Used', d.sqftRate],
+      ['Base (sqft × rate)', d.base],
+      ...(!isPost ? [['Add-Ons / visit', d.addons !== '$—' ? d.addons : '$0.00']] : []),
+      ['Distance', `${d.distance} mi`],
+      ['Fuel / visit', d.fuel],
+      ...(!isPost ? [['Frequency', `${d.freq} · ${d.visits} visits/mo`]] : []),
+      ['Per Visit', d.perVisit],
+    ]
+
+    rows.forEach((r, i) => {
+      const bg = i % 2 === 0 ? LGREY : '#fff'
+      doc.rect(50, y, W, 20).fill(bg)
+      doc.font('Helvetica').fontSize(10).fillColor(DGREY)
+         .text(r[0], 58, y + 5, { width: 200 })
+      const isBold = r[0] === 'Per Visit'
+      doc.font(isBold ? 'Helvetica-Bold' : 'Helvetica').fontSize(10).fillColor(NAVY)
+         .text(r[1], 258, y + 5, { width: W - 208, align: 'right' })
+      y += 20
+    })
+
+    /* ── SPACE BREAKDOWN (commercial only) ───────────────────── */
+    if (!isPost) {
+      y += 14
+      doc.font('Helvetica-Bold').fontSize(9).fillColor(GREEN)
+         .text('SPACE BREAKDOWN', 50, y)
+      y += 16
+
+      const spaceRows = [
+        ['Bathrooms',      `${d.bathrooms}  (+$${d.bathrooms * 20}/visit)`],
+        ['Break Rooms',    `${d.breakrooms}  (+$${d.breakrooms * 30}/visit)`],
+        ['Private Offices',`${d.offices}  (+$${d.offices * 5}/visit)`],
+        ['Trash Cans',     `${d.trash}  (+$${d.trash * 1}/visit)`],
+      ]
+      spaceRows.forEach((r, i) => {
+        const bg = i % 2 === 0 ? LGREY : '#fff'
+        doc.rect(50, y, W, 20).fill(bg)
+        doc.font('Helvetica').fontSize(10).fillColor(DGREY)
+           .text(r[0], 58, y + 5, { width: 200 })
+        doc.font('Helvetica').fontSize(10).fillColor(NAVY)
+           .text(r[1], 258, y + 5, { width: W - 208, align: 'right' })
+        y += 20
+      })
+    }
+
+    /* ── ANNUAL PROJECTION ───────────────────────────────────── */
+    if (!isPost && d.annualVal && d.annualVal !== '$—') {
+      y += 14
+      doc.rect(50, y, W, 36).fill('#e8fae5')
+      doc.font('Helvetica-Bold').fontSize(10).fillColor(GREEN)
+         .text('Annual Projection', 66, y + 4)
+      doc.font('Helvetica-Bold').fontSize(10).fillColor(NAVY)
+         .text(d.annualVal, 0, y + 4, { align: 'right', width: W + 50 - 16 })
+      doc.font('Helvetica').fontSize(9).fillColor(DGREY)
+         .text(`Based on ${d.visits} visits/mo · ${d.freq}`, 66, y + 20)
+      y += 50
+    } else {
+      y += 14
+    }
+
+    /* ── PAYMENT TERMS ───────────────────────────────────────── */
+    const terms = isPost
+      ? '50% deposit required upfront · Net 7 on remaining balance'
+      : (d.visits === '1' && d.freq === 'one-time' ? 'Payment collected same day' : 'Invoice on Net 15')
+
+    doc.rect(50, y, W, 32).fill(LGREY)
+    doc.font('Helvetica-Bold').fontSize(9).fillColor(GREEN)
+       .text('PAYMENT TERMS', 66, y + 5)
+    doc.font('Helvetica').fontSize(9).fillColor(NAVY)
+       .text(terms, 66, y + 17)
+    y += 46
+
+    /* ── NOTES ───────────────────────────────────────────────── */
+    if (d.notes) {
+      doc.font('Helvetica-Bold').fontSize(9).fillColor(GREEN)
+         .text('NOTES', 50, y)
+      y += 14
+      doc.font('Helvetica').fontSize(10).fillColor(DGREY)
+         .text(d.notes, 50, y, { width: W })
+      y += doc.heightOfString(d.notes, { width: W }) + 14
+    }
+
+    /* ── FOOTER LINE ─────────────────────────────────────────── */
+    const footerY = 742
+    doc.rect(50, footerY, W, 1).fill('#dde0e6')
+    doc.font('Helvetica').fontSize(9).fillColor('#aaa')
+       .text('Kenest Cleaning Co.  ·  kenestcleaning@gmail.com  ·  (314) 325-6533  ·  St. Louis, MO',
+             50, footerY + 8, { align: 'center', width: W })
+
+    doc.end()
+  })
+}
+
 // ── Calculator Quote Email ────────────────────────────────────────────────────
 app.post('/api/calculator-quote', async (req, res) => {
   const {
@@ -265,6 +427,14 @@ app.post('/api/calculator-quote', async (req, res) => {
 
   console.log(`[CALC QUOTE] ${new Date().toISOString()} | ${client} | ${monthly}`)
 
+  // Generate PDF
+  let pdfBuffer = null
+  try {
+    pdfBuffer = await buildQuotePDF(req.body)
+  } catch (err) {
+    console.error('[CALC QUOTE] PDF generation error:', err)
+  }
+
   if (!GMAIL_PASS) {
     console.warn('[CALC QUOTE] No GMAIL_APP_PASSWORD — logged but not sent.')
     return res.json({ success: true })
@@ -272,12 +442,21 @@ app.post('/api/calculator-quote', async (req, res) => {
 
   try {
     const t = getTransporter()
-    await t.sendMail({
+    const mailOpts = {
       from:    `"Kenest Calculator" <${GMAIL_USER}>`,
       to:      NOTIFY_EMAIL,
       subject: `Calculator Quote — ${client} · ${monthly}`,
-      html
-    })
+      html,
+    }
+    if (pdfBuffer) {
+      const safeName = client.replace(/[^a-z0-9]/gi, '_').toLowerCase()
+      mailOpts.attachments = [{
+        filename:    `kenest_quote_${safeName}.pdf`,
+        content:     pdfBuffer,
+        contentType: 'application/pdf',
+      }]
+    }
+    await t.sendMail(mailOpts)
     res.json({ success: true })
   } catch (err) {
     console.error('Calc quote email error:', err)
