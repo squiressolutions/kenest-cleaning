@@ -22,6 +22,25 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.static(path.join(__dirname, 'public')))
 
+// ── Debug ─────────────────────────────────────────────────────────────────────
+app.get('/api/debug-email', async (req, res) => {
+  const status = {
+    GMAIL_USER: GMAIL_USER,
+    NOTIFY_EMAIL: NOTIFY_EMAIL,
+    GMAIL_PASS_SET: !!GMAIL_PASS,
+    GMAIL_PASS_LENGTH: GMAIL_PASS ? GMAIL_PASS.length : 0,
+  }
+  try {
+    const t = getTransporter()
+    await t.verify()
+    status.smtp_verified = true
+  } catch (err) {
+    status.smtp_verified = false
+    status.smtp_error = err.message
+  }
+  res.json(status)
+})
+
 // ── Quote Request ─────────────────────────────────────────────────────────────
 app.post('/api/quote', async (req, res) => {
   const { fname, lname, email, phone, business, service, frequency, sqft, notes } = req.body
