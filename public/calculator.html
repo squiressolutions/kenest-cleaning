@@ -1436,6 +1436,8 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
+      const text = await res.text();
+      console.log('[CALC QUOTE] status:', res.status, 'body:', text);
       if (res.ok) {
         document.getElementById('modal-form').style.display = 'none';
         document.getElementById('modal-sent').style.display = 'block';
@@ -1443,12 +1445,13 @@
       } else {
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Quote to My Email';
-        alert('Failed to send. Please try again.');
+        alert('Failed to send. Status: ' + res.status + '\n' + text);
       }
-    } catch {
+    } catch (err) {
+      console.error('[CALC QUOTE] fetch error:', err);
       btn.disabled = false;
       btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Quote to My Email';
-      alert('Failed to send. Please try again.');
+      alert('Network error: ' + err.message);
     }
   }
 
