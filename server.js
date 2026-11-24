@@ -185,6 +185,106 @@ app.post('/api/contact', async (req, res) => {
   }
 })
 
+// ── Calculator Quote Email ────────────────────────────────────────────────────
+app.post('/api/calculator-quote', async (req, res) => {
+  const {
+    client, phone, notes,
+    serviceType, sqft, distance, gasPrice, mpg,
+    monthly, perVisit, sqftRate, base, fuel, addons, annualVal, visits, freq, tier,
+    bathrooms, breakrooms, offices, trash
+  } = req.body
+
+  if (!client) return res.status(400).json({ error: 'Client name is required.' })
+
+  const isPost = serviceType === 'postconstruction'
+  const tierLabel = tier !== '—' ? tier : '—'
+
+  const spaceRows = !isPost ? `
+    <tr><td style="padding:7px 0;border-bottom:1px solid #f1f3f5;color:#999;width:40%;">Bathrooms</td><td style="padding:7px 0;border-bottom:1px solid #f1f3f5;color:#222;">${bathrooms} (+$${bathrooms * 20}/visit)</td></tr>
+    <tr><td style="padding:7px 0;border-bottom:1px solid #f1f3f5;color:#999;">Break Rooms</td><td style="padding:7px 0;border-bottom:1px solid #f1f3f5;color:#222;">${breakrooms} (+$${breakrooms * 30}/visit)</td></tr>
+    <tr><td style="padding:7px 0;border-bottom:1px solid #f1f3f5;color:#999;">Private Offices</td><td style="padding:7px 0;border-bottom:1px solid #f1f3f5;color:#222;">${offices} (+$${offices * 5}/visit)</td></tr>
+    <tr><td style="padding:7px 0;color:#999;">Trash Cans</td><td style="padding:7px 0;color:#222;">${trash} (+$${trash * 1}/visit)</td></tr>
+  ` : ''
+
+  const html = `
+    <div style="font-family:sans-serif;max-width:640px;margin:0 auto;background:#f8f9fa;padding:32px;border-radius:10px;">
+      <div style="background:#1a2744;padding:24px;border-radius:8px;margin-bottom:20px;text-align:center;">
+        <h1 style="color:#fff;margin:0;font-size:20px;letter-spacing:1px;">CALCULATOR QUOTE</h1>
+        <p style="color:rgba(255,255,255,0.5);margin:6px 0 0;font-size:13px;">Kenest Cleaning Co. · Internal</p>
+      </div>
+
+      <!-- Client -->
+      <div style="background:#fff;border-radius:8px;padding:20px;margin-bottom:14px;border:1px solid #e9ecef;">
+        <h2 style="font-size:11px;color:#3ab529;letter-spacing:2px;text-transform:uppercase;margin:0 0 14px;">Client Info</h2>
+        <table style="width:100%;border-collapse:collapse;font-size:14px;">
+          <tr><td style="padding:7px 0;border-bottom:1px solid #f1f3f5;color:#999;width:40%;">Client / Business</td><td style="padding:7px 0;border-bottom:1px solid #f1f3f5;color:#222;font-weight:600;">${client}</td></tr>
+          <tr><td style="padding:7px 0;${notes ? 'border-bottom:1px solid #f1f3f5;' : ''}color:#999;">Phone</td><td style="padding:7px 0;${notes ? 'border-bottom:1px solid #f1f3f5;' : ''}color:#222;">${phone || '—'}</td></tr>
+          ${notes ? `<tr><td style="padding:7px 0;color:#999;vertical-align:top;">Notes</td><td style="padding:7px 0;color:#222;">${notes}</td></tr>` : ''}
+        </table>
+      </div>
+
+      <!-- Pricing -->
+      <div style="background:#1a2744;border-radius:8px;padding:22px;margin-bottom:14px;text-align:center;">
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:6px;">${isPost ? 'Total Job Price' : 'Monthly Total'}</div>
+        <div style="font-size:48px;font-weight:700;color:#fff;line-height:1;">${monthly}</div>
+        ${!isPost ? `<div style="font-size:12px;color:rgba(255,255,255,0.45);margin-top:4px;">${freq}</div>` : ''}
+        ${!isPost && annualVal && annualVal !== '$—' ? `<div style="margin-top:12px;font-size:13px;color:#3ab529;font-weight:600;">Annual: ${annualVal}</div>` : ''}
+      </div>
+
+      <!-- Breakdown -->
+      <div style="background:#fff;border-radius:8px;padding:20px;margin-bottom:14px;border:1px solid #e9ecef;">
+        <h2 style="font-size:11px;color:#3ab529;letter-spacing:2px;text-transform:uppercase;margin:0 0 14px;">Price Breakdown</h2>
+        <table style="width:100%;border-collapse:collapse;font-size:14px;">
+          <tr><td style="padding:7px 0;border-bottom:1px solid #f1f3f5;color:#999;width:40%;">Service Type</td><td style="padding:7px 0;border-bottom:1px solid #f1f3f5;color:#222;font-weight:600;">${isPost ? 'Post-Construction' : 'Commercial Cleaning'}</td></tr>
+          ${isPost ? `<tr><td style="padding:7px 0;border-bottom:1px solid #f1f3f5;color:#999;">Clean Tier</td><td style="padding:7px 0;border-bottom:1px solid #f1f3f5;color:#222;">${tierLabel}</td></tr>` : ''}
+          <tr><td style="padding:7px 0;border-bottom:1px solid #f1f3f5;color:#999;">Square Footage</td><td style="padding:7px 0;border-bottom:1px solid #f1f3f5;color:#222;">${Number(sqft).toLocaleString()} sqft</td></tr>
+          <tr><td style="padding:7px 0;border-bottom:1px solid #f1f3f5;color:#999;">Rate Used</td><td style="padding:7px 0;border-bottom:1px solid #f1f3f5;color:#222;">${sqftRate}</td></tr>
+          <tr><td style="padding:7px 0;border-bottom:1px solid #f1f3f5;color:#999;">Base (sqft)</td><td style="padding:7px 0;border-bottom:1px solid #f1f3f5;color:#222;">${base}</td></tr>
+          ${!isPost ? `<tr><td style="padding:7px 0;border-bottom:1px solid #f1f3f5;color:#999;">Add-Ons/visit</td><td style="padding:7px 0;border-bottom:1px solid #f1f3f5;color:#222;">${addons !== '$—' ? addons : '$0'}</td></tr>` : ''}
+          <tr><td style="padding:7px 0;border-bottom:1px solid #f1f3f5;color:#999;">Distance</td><td style="padding:7px 0;border-bottom:1px solid #f1f3f5;color:#222;">${distance} mi — Fuel/visit: ${fuel}</td></tr>
+          ${!isPost ? `<tr><td style="padding:7px 0;border-bottom:1px solid #f1f3f5;color:#999;">Frequency</td><td style="padding:7px 0;border-bottom:1px solid #f1f3f5;color:#222;">${freq} (${visits} visits/mo)</td></tr>` : ''}
+          <tr><td style="padding:7px 0;color:#999;">Per Visit</td><td style="padding:7px 0;color:#222;font-weight:700;">${perVisit}</td></tr>
+        </table>
+      </div>
+
+      <!-- Space breakdown (commercial only) -->
+      ${!isPost ? `
+      <div style="background:#fff;border-radius:8px;padding:20px;margin-bottom:14px;border:1px solid #e9ecef;">
+        <h2 style="font-size:11px;color:#3ab529;letter-spacing:2px;text-transform:uppercase;margin:0 0 14px;">Space Breakdown</h2>
+        <table style="width:100%;border-collapse:collapse;font-size:14px;">${spaceRows}</table>
+      </div>` : ''}
+
+      <!-- Terms -->
+      <div style="background:#f0fdf0;border:1px solid rgba(58,181,41,0.25);border-radius:8px;padding:14px 18px;text-align:center;">
+        <span style="font-size:13px;font-weight:600;color:#1a2744;">${isPost ? '50% deposit upfront · Net 7 on balance' : (visits === '1' && freq === 'one-time' ? 'Collect same day' : 'Invoice on Net 15')}</span>
+      </div>
+
+      <p style="text-align:center;color:#bbb;font-size:11px;margin-top:24px;">Kenest Cleaning Co. · kenestcleaning@gmail.com · (314) 325-6533</p>
+    </div>
+  `
+
+  console.log(`[CALC QUOTE] ${new Date().toISOString()} | ${client} | ${monthly}`)
+
+  if (!GMAIL_PASS) {
+    console.warn('[CALC QUOTE] No GMAIL_APP_PASSWORD — logged but not sent.')
+    return res.json({ success: true })
+  }
+
+  try {
+    const t = getTransporter()
+    await t.sendMail({
+      from:    `"Kenest Calculator" <${GMAIL_USER}>`,
+      to:      NOTIFY_EMAIL,
+      subject: `Calculator Quote — ${client} · ${monthly}`,
+      html
+    })
+    res.json({ success: true })
+  } catch (err) {
+    console.error('Calc quote email error:', err)
+    res.json({ success: true })
+  }
+})
+
 // ── Short routes ──────────────────────────────────────────────────────────────
 app.get('/calculator', (req, res) => res.redirect('/calculator.html'))
 app.get('/quote',      (req, res) => res.redirect('/quote.html'))
