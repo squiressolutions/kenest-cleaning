@@ -84,11 +84,11 @@ const FOOTER_HTML = `
           <div class="footer-col-title">Contact</div>
           <div class="footer-contact-line">
             <i class="fa-solid fa-phone"></i>
-            <a href="tel:[YOUR BUSINESS PHONE]" class="footer-link">[YOUR BUSINESS PHONE]</a>
+            <a href="tel:3143256533" class="footer-link">(314) 325-6533</a>
           </div>
           <div class="footer-contact-line">
             <i class="fa-solid fa-envelope"></i>
-            <a href="mailto:[YOUR BUSINESS EMAIL]" class="footer-link">[YOUR BUSINESS EMAIL]</a>
+            <a href="mailto:kenestcleaning@gmail.com" class="footer-link">kenestcleaning@gmail.com</a>
           </div>
           <div class="footer-contact-line">
             <i class="fa-solid fa-clock"></i>
@@ -287,7 +287,7 @@ function initForms() {
 function initMobileCTA() {
   if (window.innerWidth >= 768) return;
   const btn = document.createElement('a');
-  btn.href = 'tel:[YOUR BUSINESS PHONE]';
+  btn.href = 'tel:3143256533';
   btn.className = 'mobile-float-cta';
   btn.innerHTML = '<i class="fa-solid fa-phone"></i> &nbsp;Call Now';
   document.body.appendChild(btn);

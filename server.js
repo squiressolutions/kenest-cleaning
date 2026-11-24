@@ -127,36 +127,34 @@ app.post('/api/contact', async (req, res) => {
   console.log(`[CONTACT] ${new Date().toISOString()} | ${name} | ${email}`)
 
   const html = `
-    <div style="font-family:sans-serif;max-width:640px;margin:0 auto;background:#f4f7f4;padding:32px;border-radius:10px;">
-      <div style="background:linear-gradient(135deg,#1a2744,#0f1a30);padding:24px;border-radius:8px;margin-bottom:20px;">
-        <h1 style="color:#ffffff;margin:0;font-size:20px;letter-spacing:2px;">NEW CONTACT MESSAGE</h1>
-        <p style="color:rgba(255,255,255,0.4);margin:5px 0 0;font-size:13px;letter-spacing:1px;">KENEST Cleaning Co., LLC</p>
+    <div style="font-family:sans-serif;max-width:640px;margin:0 auto;background:#f8f9fa;padding:32px;border-radius:10px;">
+      <div style="background:#3ab529;padding:24px;border-radius:8px;margin-bottom:20px;text-align:center;">
+        <h1 style="color:#ffffff;margin:0;font-size:20px;letter-spacing:1px;">New Contact Message</h1>
+        <p style="color:rgba(255,255,255,0.8);margin:6px 0 0;font-size:13px;">Kenest Cleaning Co.</p>
       </div>
 
-      <div style="background:#fff;border-radius:8px;padding:20px;margin-bottom:14px;border-left:4px solid #3ab529;">
+      <div style="background:#fff;border-radius:8px;padding:20px;margin-bottom:14px;border:1px solid #e9ecef;">
         <h2 style="font-size:11px;color:#3ab529;letter-spacing:2px;text-transform:uppercase;margin:0 0 14px;">Contact Details</h2>
         <table style="width:100%;border-collapse:collapse;font-size:14px;">
-          <tr><td style="padding:6px 0;color:#888;width:32%;">Name</td><td style="color:#1a2744;font-weight:600;">${name}</td></tr>
-          <tr><td style="padding:6px 0;color:#888;">Email</td><td><a href="mailto:${email}" style="color:#3ab529;">${email}</a></td></tr>
-          <tr><td style="padding:6px 0;color:#888;">Phone</td><td style="color:#1a2744;">${phone || 'Not provided'}</td></tr>
+          <tr><td style="padding:7px 0;border-bottom:1px solid #f1f3f5;color:#999;width:32%;">Name</td><td style="padding:7px 0;border-bottom:1px solid #f1f3f5;color:#222;font-weight:600;">${name}</td></tr>
+          <tr><td style="padding:7px 0;border-bottom:1px solid #f1f3f5;color:#999;">Email</td><td style="padding:7px 0;border-bottom:1px solid #f1f3f5;"><a href="mailto:${email}" style="color:#3ab529;">${email}</a></td></tr>
+          <tr><td style="padding:7px 0;color:#999;">Phone</td><td style="padding:7px 0;color:#222;">${phone || 'Not provided'}</td></tr>
         </table>
       </div>
 
-      <div style="background:#fff;border-radius:8px;padding:20px;border-left:4px solid #3ab529;">
+      <div style="background:#fff;border-radius:8px;padding:20px;margin-bottom:14px;border:1px solid #e9ecef;">
         <h2 style="font-size:11px;color:#3ab529;letter-spacing:2px;text-transform:uppercase;margin:0 0 10px;">Message</h2>
-        <p style="font-size:14px;color:#333;line-height:1.7;margin:0;">${message}</p>
+        <p style="font-size:14px;color:#444;line-height:1.7;margin:0;">${message}</p>
       </div>
 
-      <div style="margin-top:16px;text-align:center;">
-        <a href="mailto:${email}?subject=Re: Your Kenest Cleaning Inquiry&body=Hi ${name},%0A%0AThank you for reaching out to Kenest Cleaning Co.!"
-          style="display:inline-block;background:#3ab529;color:#ffffff;padding:10px 24px;border-radius:4px;text-decoration:none;font-size:13px;font-weight:600;letter-spacing:1px;">
-          REPLY TO ${name.toUpperCase()} &rarr;
+      <div style="text-align:center;margin-top:20px;">
+        <a href="mailto:${email}?subject=Re: Your Kenest Cleaning Inquiry&body=Hi ${name},%0A%0AThank you for reaching out to Kenest Cleaning Co.! We received your message and will follow up shortly.%0A%0ALooking forward to working with you!%0A%0AKenest Cleaning Co."
+          style="display:inline-block;background:#3ab529;color:#ffffff;padding:12px 28px;border-radius:6px;text-decoration:none;font-size:14px;font-weight:600;">
+          Reply to ${name} &rarr;
         </a>
       </div>
 
-      <div style="margin-top:16px;padding:12px;background:#1a2744;border-radius:6px;text-align:center;">
-        <p style="color:rgba(255,255,255,0.3);font-size:11px;margin:0;letter-spacing:1px;">KENEST CLEANING CO., LLC &middot; ST. LOUIS, MO</p>
-      </div>
+      <p style="text-align:center;color:#bbb;font-size:11px;margin-top:24px;letter-spacing:0.5px;">Kenest Cleaning Co. &middot; St. Louis, MO</p>
     </div>
   `
 
