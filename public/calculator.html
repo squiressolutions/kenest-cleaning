@@ -538,6 +538,28 @@
       margin-top: 12px;
     }
 
+    .day-btn {
+      width: 40px;
+      height: 36px;
+      border-radius: 8px;
+      border: 2px solid #e5e7eb;
+      background: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: #6b7280;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .day-btn:hover { border-color: #9ca3af; color: #374151; }
+
+    .day-btn.active {
+      border-color: #3ab529;
+      background: rgba(58,181,41,0.1);
+      color: #1a2744;
+    }
+
     @media (max-width: 768px) {
       .calc-layout { grid-template-columns: 1fr; }
       .results-panel { position: static; }
@@ -599,12 +621,30 @@
             <div class="calc-section">
               <div class="calc-section-title">Frequency</div>
               <div class="calc-field">
-                <select id="frequency" onchange="calculate()">
+                <select id="frequency" onchange="onFrequencyChange()">
                   <option value="onetime">One-Time Clean</option>
-                  <option value="monthly">Monthly</option>
-                  <option value="biweekly" selected>Bi-Weekly</option>
-                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly (×1/mo)</option>
+                  <option value="biweekly" selected>Bi-Weekly (×2/mo)</option>
+                  <option value="weekly">Weekly (×4/mo)</option>
+                  <option value="custom">Custom Schedule...</option>
                 </select>
+              </div>
+              <div id="custom-frequency-wrap" style="display:none; margin-top:10px;">
+                <div style="background:#f9fafb;border:1.5px solid #e5e7eb;border-radius:10px;padding:14px 16px;">
+                  <div style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#374151;margin-bottom:10px;">How many days per week?</div>
+                  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <button class="day-btn active" onclick="setCustomDays(1)" id="day-1">1×</button>
+                    <button class="day-btn" onclick="setCustomDays(2)" id="day-2">2×</button>
+                    <button class="day-btn" onclick="setCustomDays(3)" id="day-3">3×</button>
+                    <button class="day-btn" onclick="setCustomDays(4)" id="day-4">4×</button>
+                    <button class="day-btn" onclick="setCustomDays(5)" id="day-5">5×</button>
+                    <button class="day-btn" onclick="setCustomDays(6)" id="day-6">6×</button>
+                    <button class="day-btn" onclick="setCustomDays(7)" id="day-7">7×</button>
+                  </div>
+                  <div style="font-family:'Inter',sans-serif;font-size:11px;color:#9ca3af;margin-top:10px;" id="custom-freq-label">
+                    <i class="fa-solid fa-circle-info" style="color:#3ab529;"></i> <span id="custom-visits-text">~4 visits/month</span>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -777,6 +817,7 @@
   let serviceType = 'commercial';
   let postconTier = 'rough';
   let restroomCount = 0;
+  let customDays = 1;
   const addons = { kitchen: false, trash: false, floors: false, windows: false };
   const addonPrices = { kitchen: 40, trash: 50, floors: 80, windows: 35 };
 
@@ -814,6 +855,43 @@
     calculate();
   }
 
+  // ── Frequency Helpers ─────────────────────────────────────────────────────
+  function onFrequencyChange() {
+    const isCustom = document.getElementById('frequency').value === 'custom';
+    document.getElementById('custom-frequency-wrap').style.display = isCustom ? 'block' : 'none';
+    calculate();
+  }
+
+  function setCustomDays(n) {
+    customDays = n;
+    for (let i = 1; i <= 7; i++) {
+      document.getElementById('day-' + i).classList.toggle('active', i === n);
+    }
+    const visitsPerMonth = n * 4;
+    const label = n === 1 ? '1 day/week' : n + ' days/week';
+    document.getElementById('custom-visits-text').textContent =
+      label + ' — ~' + visitsPerMonth + ' visits/month';
+    calculate();
+  }
+
+  function getVisitsPerMonth(frequency) {
+    if (frequency === 'weekly')    return 4;
+    if (frequency === 'biweekly')  return 2;
+    if (frequency === 'monthly')   return 1;
+    if (frequency === 'custom')    return customDays * 4;
+    return null; // onetime
+  }
+
+  function getDiscountPct(frequency) {
+    if (frequency === 'weekly')   return 10;
+    if (frequency === 'biweekly') return 5;
+    if (frequency === 'custom' && customDays >= 5) return 12;
+    if (frequency === 'custom' && customDays >= 3) return 10;
+    if (frequency === 'custom' && customDays >= 2) return 7;
+    if (frequency === 'custom')   return 5;
+    return 0;
+  }
+
   // ── Core Calculate ─────────────────────────────────────────────────────────
   function calculate() {
     const sqft      = parseFloat(document.getElementById('sqft').value) || 0;
@@ -838,9 +916,7 @@
       hours = Math.max(1.5, sqft / 750);
       hours = Math.round(hours * 2) / 2; // round to nearest 0.5
 
-      // Frequency discount
-      if (frequency === 'weekly')    discountPct = 10;
-      if (frequency === 'biweekly')  discountPct = 5;
+      discountPct = getDiscountPct(frequency);
 
       // Add-ons
       const addonTotal = Object.keys(addons).reduce((sum, k) => addons[k] ? sum + addonPrices[k] : sum, 0)
@@ -879,14 +955,41 @@
       }
 
       // Monthly card
-      document.getElementById('monthly-card').style.display = 'block';
-      const showWeekly    = frequency === 'weekly'    || frequency === 'onetime';
-      const showBiweekly  = frequency === 'biweekly'  || frequency === 'onetime';
-      const showMonthly   = frequency === 'monthly'   || frequency === 'onetime';
-
-      setMonthlyRow('weekly',   showWeekly || frequency === 'weekly',   basePricePerVisit * 4);
-      setMonthlyRow('biweekly', showBiweekly || frequency === 'biweekly', basePricePerVisit * 2);
-      setMonthlyRow('monthly',  showMonthly || frequency === 'monthly',  basePricePerVisit * 1);
+      const visitsPerMonth = getVisitsPerMonth(frequency);
+      if (frequency === 'onetime') {
+        document.getElementById('monthly-card').style.display = 'block';
+        setMonthlyRow('weekly',   true, basePricePerVisit * 4);
+        setMonthlyRow('biweekly', true, basePricePerVisit * 2);
+        setMonthlyRow('monthly',  true, basePricePerVisit * 1);
+        // hide custom row if shown
+        const cr = document.getElementById('monthly-custom');
+        if (cr) cr.style.display = 'none';
+      } else if (frequency === 'custom') {
+        document.getElementById('monthly-card').style.display = 'block';
+        setMonthlyRow('weekly',   false, 0);
+        setMonthlyRow('biweekly', false, 0);
+        setMonthlyRow('monthly',  false, 0);
+        // show custom row
+        let cr = document.getElementById('monthly-custom');
+        if (!cr) {
+          cr = document.createElement('div');
+          cr.className = 'monthly-row';
+          cr.id = 'monthly-custom';
+          cr.innerHTML = '<span id="monthly-custom-label"></span><span id="monthly-custom-val"></span>';
+          document.getElementById('monthly-card').appendChild(cr);
+        }
+        cr.style.display = 'flex';
+        const dLabel = customDays === 1 ? '1×/week' : customDays + '×/week';
+        document.getElementById('monthly-custom-label').textContent = dLabel + ' (×' + visitsPerMonth + '/mo)';
+        document.getElementById('monthly-custom-val').textContent = '$' + Math.round(basePricePerVisit * visitsPerMonth);
+      } else {
+        document.getElementById('monthly-card').style.display = 'block';
+        setMonthlyRow('weekly',   frequency === 'weekly',   basePricePerVisit * 4);
+        setMonthlyRow('biweekly', frequency === 'biweekly', basePricePerVisit * 2);
+        setMonthlyRow('monthly',  frequency === 'monthly',  basePricePerVisit * 1);
+        const cr = document.getElementById('monthly-custom');
+        if (cr) cr.style.display = 'none';
+      }
 
       // Payment terms
       document.getElementById('terms-badge-wrap').innerHTML = frequency !== 'onetime'
@@ -947,6 +1050,9 @@
     document.getElementById('gasprice').value = '3.00';
     document.getElementById('mpg').value = '17';
     document.getElementById('frequency').value = 'biweekly';
+    document.getElementById('custom-frequency-wrap').style.display = 'none';
+    customDays = 1;
+    setCustomDays(1);
     restroomCount = 0;
     document.getElementById('restroom-count').textContent = '0';
     document.getElementById('restroom-price').textContent = '$0';
