@@ -2,36 +2,92 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Quote Calculator — Kenest Cleaning Co.</title>
   <link rel="icon" href="/logo.png" type="image/png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Kenest Calc">
+  <meta name="theme-color" content="#1a2744">
+  <link rel="apple-touch-icon" href="/logo.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="/css/style.css">
   <style>
-    body { background: #f3f4f6; }
+    body { background: #f3f4f6; padding-top: 0 !important; }
+
+    /* ── App Header ── */
+    .app-header {
+      background: #1a2744;
+      padding: 16px 24px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+    }
+
+    .app-header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .app-header img {
+      height: 44px;
+      width: auto;
+      display: block;
+      filter: brightness(0) invert(1);
+      mix-blend-mode: normal;
+    }
+
+    .app-header-title {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .app-header-title strong {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 0.02em;
+      line-height: 1;
+    }
+
+    .app-header-title span {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.45);
+      letter-spacing: 0.04em;
+    }
+
+    .app-header-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(58,181,41,0.15);
+      border: 1px solid rgba(58,181,41,0.3);
+      border-radius: 100px;
+      padding: 5px 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      color: #6fe355;
+    }
+
+    .app-header-badge i { font-size: 10px; }
 
     .calc-wrapper {
       max-width: 1040px;
       margin: 0 auto;
-      padding: 40px 24px 80px;
+      padding: 28px 24px 80px;
     }
-
-    .calc-header {
-      text-align: center;
-      margin-bottom: 32px;
-    }
-
-    .calc-header img { height: 50px; margin: 0 auto 14px; }
-
-    .calc-header h1 {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 30px;
-      font-weight: 800;
-      color: #1a2744;
-      margin-bottom: 4px;
-    }
-
-    .calc-header p { font-size: 13px; color: #9ca3af; }
 
     .calc-layout {
       display: grid;
@@ -558,13 +614,20 @@
   </style>
 </head>
 <body>
-<div class="calc-wrapper">
-
-  <div class="calc-header">
+<div class="app-header">
+  <div class="app-header-left">
     <img src="/logo.png" alt="Kenest Cleaning Co.">
-    <h1>Quote Calculator</h1>
-    <p>Internal use — price every job before the walkthrough</p>
+    <div class="app-header-title">
+      <strong>Quote Calculator</strong>
+      <span>Kenest Cleaning Co.</span>
+    </div>
   </div>
+  <div class="app-header-badge">
+    <i class="fa-solid fa-lock"></i> Internal Use
+  </div>
+</div>
+
+<div class="calc-wrapper">
 
   <div class="calc-layout">
 

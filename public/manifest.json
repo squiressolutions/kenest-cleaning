@@ -1,0 +1,22 @@
+{
+  "name": "Kenest Quote Calculator",
+  "short_name": "Kenest Calc",
+  "description": "Internal quote calculator for Kenest Cleaning Co.",
+  "start_url": "/calculator.html",
+  "display": "standalone",
+  "background_color": "#1a2744",
+  "theme_color": "#1a2744",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
