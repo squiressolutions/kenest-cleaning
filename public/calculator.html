@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quote Calculator — Kenest Cleaning Co.</title>
+  <link rel="icon" href="/logo.png" type="image/png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    body { background: #f3f4f6; }
+
+    .calc-wrapper {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    .calc-header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .calc-header img {
+      height: 52px;
+      margin: 0 auto 16px;
+    }
+
+    .calc-header h1 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 32px;
+      font-weight: 800;
+      color: #1a2744;
+      margin-bottom: 6px;
+    }
+
+    .calc-header p {
+      font-size: 14px;
+      color: #6b7280;
+    }
+
+    .calc-layout {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* ── Input Panel ── */
+    .calc-panel {
+      background: #fff;
+      border-radius: 14px;
+      border: 1px solid #e5e7eb;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+
+    .calc-panel-header {
+      background: #1a2744;
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .calc-panel-header i { color: #3ab529; font-size: 16px; }
+
+    .calc-panel-header span {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #fff;
+    }
+
+    .calc-panel-body { padding: 24px; }
+
+    .calc-section {
+      margin-bottom: 28px;
+    }
+
+    .calc-section:last-child { margin-bottom: 0; }
+
+    .calc-section-title {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #3ab529;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .calc-section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #e5e7eb;
+    }
+
+    .calc-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .calc-row.full { grid-template-columns: 1fr; }
+    .calc-row:last-child { margin-bottom: 0; }
+
+    .calc-field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .calc-field label {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .calc-field input,
+    .calc-field select {
+      padding: 10px 12px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      color: #111827;
+      background: #fff;
+      transition: border-color 0.2s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .calc-field input:focus,
+    .calc-field select:focus {
+      outline: none;
+      border-color: #3ab529;
+      box-shadow: 0 0 0 3px rgba(58,181,41,0.1);
+    }
+
+    .calc-field select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 8L1 3h10z' fill='%236b7280'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 32px;
+    }
+
+    /* Toggle group for service type */
+    .toggle-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .toggle-btn {
+      padding: 12px 10px;
+      border: 2px solid #e5e7eb;
+      border-radius: 10px;
+      background: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: #6b7280;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-align: center;
+    }
+
+    .toggle-btn i { font-size: 15px; }
+
+    .toggle-btn.active {
+      border-color: #3ab529;
+      background: rgba(58,181,41,0.07);
+      color: #1a2744;
+    }
+
+    /* Post-con tiers */
+    .tier-group {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .tier-btn {
+      padding: 10px 6px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      background: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: #6b7280;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .tier-btn .tier-rate {
+      display: block;
+      font-size: 11px;
+      font-weight: 500;
+      color: #9ca3af;
+      margin-top: 2px;
+    }
+
+    .tier-btn.active {
+      border-color: #3ab529;
+      background: rgba(58,181,41,0.07);
+      color: #1a2744;
+    }
+
+    .tier-btn.active .tier-rate { color: #3ab529; }
+
+    /* Addon checkboxes */
+    .addon-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .addon-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+    }
+
+    .addon-item:hover { border-color: #9ca3af; }
+    .addon-item.checked { border-color: #3ab529; background: rgba(58,181,41,0.05); }
+
+    .addon-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .addon-left i { color: #3ab529; font-size: 14px; width: 16px; }
+
+    .addon-left span {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: #374151;
+    }
+
+    .addon-price {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: #1a2744;
+    }
+
+    .addon-item.checked .addon-price { color: #3ab529; }
+
+    /* Restroom counter */
+    .counter-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 8px;
+    }
+
+    .counter-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .counter-left i { color: #3ab529; font-size: 14px; width: 16px; }
+
+    .counter-left span {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: #374151;
+    }
+
+    .counter-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .counter-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1.5px solid #e5e7eb;
+      background: #fff;
+      font-size: 16px;
+      color: #374151;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+      line-height: 1;
+    }
+
+    .counter-btn:hover { border-color: #3ab529; color: #3ab529; }
+
+    .counter-val {
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: #1a2744;
+      min-width: 20px;
+      text-align: center;
+    }
+
+    .counter-price {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: #1a2744;
+      min-width: 48px;
+      text-align: right;
+    }
+
+    /* Hidden sections */
+    .section-commercial,
+    .section-postconstruction { display: none; }
+    .section-commercial.show,
+    .section-postconstruction.show { display: block; }
+
+    /* ── Results Panel ── */
+    .results-panel {
+      position: sticky;
+      top: 100px;
+    }
+
+    .results-card {
+      background: #1a2744;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(26,39,68,0.25);
+    }
+
+    .results-top {
+      background: #3ab529;
+      padding: 20px 24px;
+      text-align: center;
+    }
+
+    .results-top p {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.8);
+      margin-bottom: 4px;
+    }
+
+    .results-price {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 52px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1;
+    }
+
+    .results-price-sub {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      color: rgba(255,255,255,0.75);
+      margin-top: 4px;
+    }
+
+    .results-body { padding: 20px 24px; }
+
+    .results-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 9px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .results-line:last-child { border-bottom: none; }
+
+    .results-line-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      color: rgba(255,255,255,0.55);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .results-line-label i { color: #3ab529; font-size: 12px; width: 14px; }
+
+    .results-line-val {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .results-divider {
+      height: 1px;
+      background: rgba(255,255,255,0.12);
+      margin: 12px 0;
+    }
+
+    .results-net {
+      background: rgba(58,181,41,0.15);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-top: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .results-net-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .results-net-val {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: #6fe355;
+    }
+
+    /* Monthly breakdown */
+    .monthly-card {
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-top: 12px;
+    }
+
+    .monthly-card-title {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 10px;
+    }
+
+    .monthly-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 0;
+    }
+
+    .monthly-row span:first-child {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      color: rgba(255,255,255,0.5);
+    }
+
+    .monthly-row span:last-child {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    /* Reset button */
+    .btn-reset {
+      width: 100%;
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.6);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-reset:hover {
+      background: rgba(255,255,255,0.12);
+      color: #fff;
+    }
+
+    /* Warning / hint */
+    .calc-hint {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      color: #9ca3af;
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .calc-hint i { color: #3ab529; font-size: 10px; }
+
+    /* Payment terms badge */
+    .terms-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(58,181,41,0.12);
+      border: 1px solid rgba(58,181,41,0.25);
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      color: #3ab529;
+      margin-top: 12px;
+    }
+
+    @media (max-width: 768px) {
+      .calc-layout { grid-template-columns: 1fr; }
+      .results-panel { position: static; }
+      .calc-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="calc-wrapper">
+
+  <div class="calc-header">
+    <img src="/logo.png" alt="Kenest Cleaning Co.">
+    <h1>Quote Calculator</h1>
+    <p>Internal use only — price every job before the walkthrough</p>
+  </div>
+
+  <div class="calc-layout">
+
+    <!-- Left: Inputs -->
+    <div>
+      <div class="calc-panel">
+        <div class="calc-panel-header">
+          <i class="fa-solid fa-sliders"></i>
+          <span>Job Details</span>
+        </div>
+        <div class="calc-panel-body">
+
+          <!-- Service Type -->
+          <div class="calc-section">
+            <div class="calc-section-title">Service Type</div>
+            <div class="toggle-group">
+              <button class="toggle-btn active" onclick="setServiceType('commercial')" id="btn-commercial">
+                <i class="fa-solid fa-building"></i> Commercial Cleaning
+              </button>
+              <button class="toggle-btn" onclick="setServiceType('postconstruction')" id="btn-postconstruction">
+                <i class="fa-solid fa-helmet-safety"></i> Post-Construction
+              </button>
+            </div>
+          </div>
+
+          <!-- Square Footage -->
+          <div class="calc-section">
+            <div class="calc-section-title">Space Details</div>
+            <div class="calc-row">
+              <div class="calc-field">
+                <label>Square Footage</label>
+                <input type="number" id="sqft" placeholder="e.g. 2500" min="0" oninput="calculate()">
+              </div>
+              <div class="calc-field">
+                <label>Distance to Job (miles)</label>
+                <input type="number" id="distance" placeholder="e.g. 12" min="0" oninput="calculate()">
+              </div>
+            </div>
+            <p class="calc-hint"><i class="fa-solid fa-circle-info"></i> One-way miles from your location</p>
+          </div>
+
+          <!-- Commercial Section -->
+          <div class="section-commercial show" id="section-commercial">
+            <div class="calc-section">
+              <div class="calc-section-title">Frequency</div>
+              <div class="calc-field">
+                <select id="frequency" onchange="calculate()">
+                  <option value="onetime">One-Time Clean</option>
+                  <option value="monthly">Monthly</option>
+                  <option value="biweekly" selected>Bi-Weekly</option>
+                  <option value="weekly">Weekly</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="calc-section">
+              <div class="calc-section-title">Add-Ons</div>
+              <div class="addon-list">
+                <!-- Restrooms counter -->
+                <div class="counter-row" id="restroom-row">
+                  <div class="counter-left">
+                    <i class="fa-solid fa-restroom"></i>
+                    <span>Restrooms</span>
+                  </div>
+                  <div class="counter-controls">
+                    <button class="counter-btn" onclick="changeRestrooms(-1)">−</button>
+                    <span class="counter-val" id="restroom-count">0</span>
+                    <button class="counter-btn" onclick="changeRestrooms(1)">+</button>
+                    <span class="counter-price" id="restroom-price">$0</span>
+                  </div>
+                </div>
+                <!-- Kitchen -->
+                <div class="addon-item" id="addon-kitchen" onclick="toggleAddon('kitchen')">
+                  <div class="addon-left">
+                    <i class="fa-solid fa-kitchen-set"></i>
+                    <span>Kitchen / Breakroom</span>
+                  </div>
+                  <span class="addon-price">+$40</span>
+                </div>
+                <!-- Heavy trash -->
+                <div class="addon-item" id="addon-trash" onclick="toggleAddon('trash')">
+                  <div class="addon-left">
+                    <i class="fa-solid fa-trash"></i>
+                    <span>Heavy Trash / Debris</span>
+                  </div>
+                  <span class="addon-price">+$50</span>
+                </div>
+                <!-- Floor care -->
+                <div class="addon-item" id="addon-floors" onclick="toggleAddon('floors')">
+                  <div class="addon-left">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <span>Floor Stripping / Waxing</span>
+                  </div>
+                  <span class="addon-price">+$80</span>
+                </div>
+                <!-- Windows -->
+                <div class="addon-item" id="addon-windows" onclick="toggleAddon('windows')">
+                  <div class="addon-left">
+                    <i class="fa-solid fa-window-restore"></i>
+                    <span>Interior Window Cleaning</span>
+                  </div>
+                  <span class="addon-price">+$35</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Post-Construction Section -->
+          <div class="section-postconstruction" id="section-postconstruction">
+            <div class="calc-section">
+              <div class="calc-section-title">Clean Tier</div>
+              <div class="tier-group">
+                <button class="tier-btn active" onclick="setTier('rough')" id="tier-rough">
+                  Rough Clean
+                  <span class="tier-rate">$0.17/sq ft</span>
+                </button>
+                <button class="tier-btn" onclick="setTier('final')" id="tier-final">
+                  Final Clean
+                  <span class="tier-rate">$0.28/sq ft</span>
+                </button>
+                <button class="tier-btn" onclick="setTier('touchup')" id="tier-touchup">
+                  Touch-Up
+                  <span class="tier-rate">$0.14/sq ft</span>
+                </button>
+              </div>
+              <p class="calc-hint" style="margin-top:10px;"><i class="fa-solid fa-circle-info"></i> 50% deposit required upfront</p>
+            </div>
+          </div>
+
+          <!-- Gas Price -->
+          <div class="calc-section">
+            <div class="calc-section-title">Fuel Settings</div>
+            <div class="calc-row">
+              <div class="calc-field">
+                <label>Gas Price ($/gal)</label>
+                <input type="number" id="gasprice" value="3.00" step="0.05" min="0" oninput="calculate()">
+              </div>
+              <div class="calc-field">
+                <label>Est. MPG (your Tacoma)</label>
+                <input type="number" id="mpg" value="17" min="1" oninput="calculate()">
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Results -->
+    <div class="results-panel">
+      <div class="results-card">
+        <div class="results-top">
+          <p>Recommended Quote</p>
+          <div class="results-price" id="result-price">$—</div>
+          <div class="results-price-sub" id="result-price-sub">per visit</div>
+        </div>
+        <div class="results-body">
+
+          <div class="results-line">
+            <span class="results-line-label"><i class="fa-solid fa-clock"></i> Est. Time</span>
+            <span class="results-line-val" id="result-hours">— hrs</span>
+          </div>
+          <div class="results-line">
+            <span class="results-line-label"><i class="fa-solid fa-person"></i> Labor</span>
+            <span class="results-line-val" id="result-labor">$—</span>
+          </div>
+          <div class="results-line">
+            <span class="results-line-label"><i class="fa-solid fa-spray-can"></i> Supplies</span>
+            <span class="results-line-val" id="result-supplies">$30</span>
+          </div>
+          <div class="results-line">
+            <span class="results-line-label"><i class="fa-solid fa-gas-pump"></i> Fuel</span>
+            <span class="results-line-val" id="result-fuel">$—</span>
+          </div>
+          <div class="results-line" id="addons-line" style="display:none;">
+            <span class="results-line-label"><i class="fa-solid fa-plus"></i> Add-Ons</span>
+            <span class="results-line-val" id="result-addons">$—</span>
+          </div>
+          <div class="results-line" id="discount-line" style="display:none;">
+            <span class="results-line-label"><i class="fa-solid fa-tag"></i> Frequency Discount</span>
+            <span class="results-line-val" id="result-discount" style="color:#6fe355;">—</span>
+          </div>
+
+          <div class="results-divider"></div>
+
+          <div class="results-net">
+            <span class="results-net-label">Your Net / Visit</span>
+            <span class="results-net-val" id="result-net">$—</span>
+          </div>
+
+          <div class="monthly-card" id="monthly-card" style="display:none;">
+            <div class="monthly-card-title">Monthly Revenue</div>
+            <div class="monthly-row" id="monthly-weekly" style="display:none;">
+              <span>Weekly (×4)</span>
+              <span id="monthly-weekly-val">$—</span>
+            </div>
+            <div class="monthly-row" id="monthly-biweekly" style="display:none;">
+              <span>Bi-Weekly (×2)</span>
+              <span id="monthly-biweekly-val">$—</span>
+            </div>
+            <div class="monthly-row" id="monthly-monthly" style="display:none;">
+              <span>Monthly (×1)</span>
+              <span id="monthly-monthly-val">$—</span>
+            </div>
+          </div>
+
+          <div id="terms-badge-wrap"></div>
+
+        </div>
+      </div>
+
+      <button class="btn-reset" onclick="resetCalc()">
+        <i class="fa-solid fa-rotate-left"></i> Reset Calculator
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ── State ──────────────────────────────────────────────────────────────────
+  let serviceType = 'commercial';
+  let postconTier = 'rough';
+  let restroomCount = 0;
+  const addons = { kitchen: false, trash: false, floors: false, windows: false };
+  const addonPrices = { kitchen: 40, trash: 50, floors: 80, windows: 35 };
+
+  // ── Service Type Toggle ────────────────────────────────────────────────────
+  function setServiceType(type) {
+    serviceType = type;
+    document.getElementById('btn-commercial').classList.toggle('active', type === 'commercial');
+    document.getElementById('btn-postconstruction').classList.toggle('active', type === 'postconstruction');
+    document.getElementById('section-commercial').classList.toggle('show', type === 'commercial');
+    document.getElementById('section-postconstruction').classList.toggle('show', type === 'postconstruction');
+    calculate();
+  }
+
+  // ── Post-Con Tier ──────────────────────────────────────────────────────────
+  function setTier(tier) {
+    postconTier = tier;
+    ['rough','final','touchup'].forEach(t => {
+      document.getElementById('tier-' + t).classList.toggle('active', t === tier);
+    });
+    calculate();
+  }
+
+  // ── Restrooms ─────────────────────────────────────────────────────────────
+  function changeRestrooms(delta) {
+    restroomCount = Math.max(0, restroomCount + delta);
+    document.getElementById('restroom-count').textContent = restroomCount;
+    document.getElementById('restroom-price').textContent = restroomCount > 0 ? '+$' + (restroomCount * 25) : '$0';
+    calculate();
+  }
+
+  // ── Addon Toggle ──────────────────────────────────────────────────────────
+  function toggleAddon(key) {
+    addons[key] = !addons[key];
+    document.getElementById('addon-' + key).classList.toggle('checked', addons[key]);
+    calculate();
+  }
+
+  // ── Core Calculate ─────────────────────────────────────────────────────────
+  function calculate() {
+    const sqft      = parseFloat(document.getElementById('sqft').value) || 0;
+    const distance  = parseFloat(document.getElementById('distance').value) || 0;
+    const gasPrice  = parseFloat(document.getElementById('gasprice').value) || 3.00;
+    const mpg       = parseFloat(document.getElementById('mpg').value) || 17;
+    const frequency = document.getElementById('frequency').value;
+
+    if (sqft === 0) {
+      setEmpty();
+      return;
+    }
+
+    const supplies  = 30;
+    const costPerMile = gasPrice / mpg;
+    const fuelCost  = Math.round(distance * 2 * costPerMile * 100) / 100;
+
+    let hours, basePricePerVisit, discountPct = 0, tierRate = 0;
+
+    if (serviceType === 'commercial') {
+      // Hours estimate: ~750 sqft/hr, minimum 1.5hrs
+      hours = Math.max(1.5, sqft / 750);
+      hours = Math.round(hours * 2) / 2; // round to nearest 0.5
+
+      // Frequency discount
+      if (frequency === 'weekly')    discountPct = 10;
+      if (frequency === 'biweekly')  discountPct = 5;
+
+      // Add-ons
+      const addonTotal = Object.keys(addons).reduce((sum, k) => addons[k] ? sum + addonPrices[k] : sum, 0)
+                       + (restroomCount * 25);
+
+      const labor = hours * 50;
+      const subtotal = labor + supplies + fuelCost + addonTotal;
+      const discount = subtotal * (discountPct / 100);
+      basePricePerVisit = Math.ceil((subtotal - discount) / 5) * 5; // round up to nearest $5
+
+      // Display
+      const net = basePricePerVisit - supplies - fuelCost;
+
+      document.getElementById('result-price').textContent  = '$' + basePricePerVisit;
+      document.getElementById('result-price-sub').textContent = 'per visit';
+      document.getElementById('result-hours').textContent  = hours.toFixed(1) + ' hrs';
+      document.getElementById('result-labor').textContent  = '$' + labor.toFixed(0);
+      document.getElementById('result-supplies').textContent = '$30';
+      document.getElementById('result-fuel').textContent   = '$' + fuelCost.toFixed(2);
+      document.getElementById('result-net').textContent    = '$' + Math.round(net);
+
+      // Add-ons line
+      if (addonTotal > 0) {
+        document.getElementById('addons-line').style.display = 'flex';
+        document.getElementById('result-addons').textContent = '+$' + addonTotal;
+      } else {
+        document.getElementById('addons-line').style.display = 'none';
+      }
+
+      // Discount line
+      if (discountPct > 0) {
+        document.getElementById('discount-line').style.display = 'flex';
+        document.getElementById('result-discount').textContent = '-' + discountPct + '%';
+      } else {
+        document.getElementById('discount-line').style.display = 'none';
+      }
+
+      // Monthly card
+      document.getElementById('monthly-card').style.display = 'block';
+      const showWeekly    = frequency === 'weekly'    || frequency === 'onetime';
+      const showBiweekly  = frequency === 'biweekly'  || frequency === 'onetime';
+      const showMonthly   = frequency === 'monthly'   || frequency === 'onetime';
+
+      setMonthlyRow('weekly',   showWeekly || frequency === 'weekly',   basePricePerVisit * 4);
+      setMonthlyRow('biweekly', showBiweekly || frequency === 'biweekly', basePricePerVisit * 2);
+      setMonthlyRow('monthly',  showMonthly || frequency === 'monthly',  basePricePerVisit * 1);
+
+      // Payment terms
+      document.getElementById('terms-badge-wrap').innerHTML = frequency !== 'onetime'
+        ? '<div class="terms-badge"><i class="fa-solid fa-file-invoice-dollar"></i> Invoice on Net 15</div>'
+        : '<div class="terms-badge"><i class="fa-solid fa-money-bill"></i> Collect same day</div>';
+
+    } else {
+      // Post-construction
+      const tierRates = { rough: 0.17, final: 0.28, touchup: 0.14 };
+      tierRate = tierRates[postconTier];
+      hours = Math.max(2, sqft * (postconTier === 'final' ? (1/300) : postconTier === 'rough' ? (1/400) : (1/500)));
+      hours = Math.round(hours * 2) / 2;
+
+      basePricePerVisit = Math.ceil((sqft * tierRate) / 5) * 5;
+      const net = basePricePerVisit - supplies - fuelCost;
+      const deposit = Math.round(basePricePerVisit / 2);
+
+      document.getElementById('result-price').textContent  = '$' + basePricePerVisit;
+      document.getElementById('result-price-sub').textContent = 'total job price';
+      document.getElementById('result-hours').textContent  = hours.toFixed(1) + ' hrs';
+      document.getElementById('result-labor').textContent  = '$' + (hours * 50).toFixed(0);
+      document.getElementById('result-supplies').textContent = '$30';
+      document.getElementById('result-fuel').textContent   = '$' + fuelCost.toFixed(2);
+      document.getElementById('result-net').textContent    = '$' + Math.round(net);
+      document.getElementById('addons-line').style.display = 'none';
+      document.getElementById('discount-line').style.display = 'none';
+      document.getElementById('monthly-card').style.display = 'none';
+
+      document.getElementById('terms-badge-wrap').innerHTML =
+        '<div class="terms-badge"><i class="fa-solid fa-file-invoice-dollar"></i> 50% deposit ($' + deposit + ') + Net 7 on balance</div>';
+    }
+  }
+
+  function setMonthlyRow(id, show, val) {
+    const row = document.getElementById('monthly-' + id);
+    const valEl = document.getElementById('monthly-' + id + '-val');
+    row.style.display = show ? 'flex' : 'none';
+    valEl.textContent = '$' + Math.round(val);
+  }
+
+  function setEmpty() {
+    document.getElementById('result-price').textContent = '$—';
+    document.getElementById('result-price-sub').textContent = 'per visit';
+    document.getElementById('result-hours').textContent = '— hrs';
+    document.getElementById('result-labor').textContent = '$—';
+    document.getElementById('result-supplies').textContent = '$30';
+    document.getElementById('result-fuel').textContent = '$—';
+    document.getElementById('result-net').textContent = '$—';
+    document.getElementById('addons-line').style.display = 'none';
+    document.getElementById('discount-line').style.display = 'none';
+    document.getElementById('monthly-card').style.display = 'none';
+    document.getElementById('terms-badge-wrap').innerHTML = '';
+  }
+
+  function resetCalc() {
+    document.getElementById('sqft').value = '';
+    document.getElementById('distance').value = '';
+    document.getElementById('gasprice').value = '3.00';
+    document.getElementById('mpg').value = '17';
+    document.getElementById('frequency').value = 'biweekly';
+    restroomCount = 0;
+    document.getElementById('restroom-count').textContent = '0';
+    document.getElementById('restroom-price').textContent = '$0';
+    Object.keys(addons).forEach(k => {
+      addons[k] = false;
+      document.getElementById('addon-' + k).classList.remove('checked');
+    });
+    setServiceType('commercial');
+    setEmpty();
+  }
+</script>
+</body>
+</html>
